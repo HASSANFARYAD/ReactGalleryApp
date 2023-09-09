@@ -5,7 +5,7 @@ import { FaCamera } from 'react-icons/fa';
 import './App.css';
 
 const App = () => {
-    const [search, setSearch] = useState("Nepal")
+    const [search, setSearch] = useState("Trending")
     const [imageList, setImageList] = useState([])
 
     useEffect(() => {
@@ -30,7 +30,7 @@ const App = () => {
 
     return (
         <div>
-            <h1 className="heading">Pictures <span>You Need</span></h1>
+            <h1 className="heading">FreeCanvas <span>Your Copyright-Free Image Haven</span></h1>
             <p className="sub-heading">Search for your favourite images</p>
             <div className='search-bar'>
                 <input type="text" placeholder="Search Images"
