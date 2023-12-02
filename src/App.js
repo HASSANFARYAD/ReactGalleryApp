@@ -6,6 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import noImage from "./assets/img/No image.png";
 import BlogDetail from "./pages/BlogDetail";
+import { Analytics } from "@vercel/analytics/react";
 
 const App = () => {
   const [search, setSearch] = useState("Crypto");
@@ -115,6 +116,7 @@ const App = () => {
           </Row>
         </>
       )}
+      <Analytics />
     </div>
   );
 };
