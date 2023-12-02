@@ -1,1 +1,1 @@
-export const UNSPLASH_ACCESS_KEY = "FiwzZBKTyUyU_9Gi6hnF0PwFRA-QmRMkpk0Y7cvbHx4";
+export const UNSPLASH_ACCESS_KEY = "pub_30340a6ea4272847875465f9a8d98b0fe71e2";

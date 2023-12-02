@@ -1,58 +1,122 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
-import { UNSPLASH_ACCESS_KEY } from './config/constants';
-import { FaCamera } from 'react-icons/fa';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import { UNSPLASH_ACCESS_KEY } from "./config/constants";
+import axios from "axios";
+import { Card, Button, Container, Row, Col } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
+import noImage from "./assets/img/No image.png";
+import BlogDetail from "./pages/BlogDetail";
 
 const App = () => {
-    const [search, setSearch] = useState("Trending")
-    const [imageList, setImageList] = useState([])
+  const [search, setSearch] = useState("Crypto");
+  const [blogList, setBlogList] = useState([]);
+  const [page, setPage] = useState(1);
+  const [nextPage, setNextPage] = useState("");
 
-    useEffect(() => {
-        fetchImages(search)
-    }, [])
+  const [selectedBlog, setSelectedBlog] = useState(null);
 
-    /**
-     * description: Fetch images from unsplash api
-     * @param {string} search - search query
-     */
-    const fetchImages = (query) => {
-        if (search) {
-            axios.get(`https://api.unsplash.com/search/collections?client_id=${UNSPLASH_ACCESS_KEY}&per_page=12&query=${query}`)
-                .then(res => {
-                    setImageList(res.data.results)
-                })
-                .catch(err => {
-                    console.log(err)
-                })
-        }
-    }
+  useEffect(() => {
+    fetchBlogs();
+  }, [nextPage]);
 
-    return (
-        <div>
-            <h1 className="heading">FreeCanvas <span>Your Copyright-Free Image Haven</span></h1>
-            <p className="sub-heading">Search for your favourite images</p>
-            <div className='search-bar'>
-                <input type="text" placeholder="Search Images"
-                    onChange={(e) => setSearch(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && fetchImages(search)} />
-                <button onClick={() => fetchImages(search)}>Search</button>
-            </div>
-            <div className="image-list">
-                {imageList.length === 0 && <p className="no-image">No Images Found</p>}
-                {imageList.length > 0 && imageList.map((image, index) => {
-                    return (
-                        <figure className="image" key={index}>
-                            <a href={image.cover_photo ? image.cover_photo.urls.regular : "./No image.png"} target="_blank" rel='noreferrer'>
-                                <img src={image.cover_photo ? image.cover_photo.urls.regular : './No image.png'} alt={image.cover_photo ? image.cover_photo.alt_description : "Anonymous"} />
-                            </a>
-                            <div className="overlay"><FaCamera style={{ marginBottom: "-2px" }} /> {image.cover_photo ? image.cover_photo.user.name : "Anonymous"}</div>
-                        </figure>
-                    )
-                })}
-            </div>
-        </div>
-    )
-}
+  const fetchBlogs = () => {
+    const apiUrl = `https://newsdata.io/api/1/news?apikey=${UNSPLASH_ACCESS_KEY}&q=${search}`;
 
-export default App
+    axios
+      .get(apiUrl)
+      .then((res) => {
+        console.log(res);
+        setBlogList(res.data.results);
+        setNextPage(res.data.nextPage);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const handleReset = () => {
+    setSelectedBlog(null);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+  };
+
+  const handleSearch = () => {
+    setPage(1);
+    fetchBlogs();
+  };
+
+  const handlePagination = (newPage) => {
+    setPage(newPage);
+  };
+
+  const handleBlogClick = (blog) => {
+    setSelectedBlog(blog);
+  };
+
+  return (
+    <div className="container my-5">
+      {selectedBlog ? (
+        <BlogDetail blog={selectedBlog} onReset={handleReset} />
+      ) : (
+        <>
+          <p className="sub-heading">Search for your favorite blogs</p>
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Search Blogs"
+              value={search}
+              onChange={handleSearchChange}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            />
+            <button onClick={handleSearch}>Search</button>
+          </div>
+          <Row>
+            {blogList.map((blog, index) => (
+              <Col md={4} key={index} className="mb-3 pb-3">
+                <Card>
+                  <Card.Img
+                    variant="top"
+                    src={blog.image_url || noImage}
+                    onError={(e) => {
+                      e.target.src = noImage; // Set the path to your custom error image
+                    }}
+                    style={{ height: "200px" }}
+                  />
+                  <Card.Body style={{ height: "300px", overflowY: "scroll" }}>
+                    <Row>
+                      <Col md={12}>
+                        <h6>
+                          Published: <span>{blog.pubDate}</span>
+                        </h6>
+                      </Col>
+                    </Row>
+                    <Card.Title>{blog.title}</Card.Title>
+                    <Card.Text>{blog.description}</Card.Text>
+                    <Button
+                      variant="primary"
+                      onClick={() => handleBlogClick(blog)}
+                    >
+                      Read More
+                    </Button>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+            <Col md={12} className="text-center">
+              <button
+                className="btn btn-primary btn-lg"
+                onClick={() => handlePagination(nextPage)}
+              >
+                Next
+              </button>
+            </Col>
+          </Row>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default App;
